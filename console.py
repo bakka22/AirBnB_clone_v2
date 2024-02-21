@@ -30,30 +30,10 @@ class HBNBCommand(cmd.Cmd):
              'latitude': float, 'longitude': float
             }
 
-    @staticmethod
-    def argparse(line):
-        """ parses command line into seperate argument """
-        arls = line.split()
-        dic = {}
-        for i in range(1, len(arls)):
-            tmp1, tmp2 = arls[i].split("=")
-            try:
-                if tmp2[0] == '"' and tmp2[-1] == '"':
-                    tmp2.replace('"', '\"')
-                    tmp2.replace("_", " ")
-                    tmp2 = tmp2[1:-1]
-                    dic[tmp1] = tmp2
-                elif type(eval(tmp2)) in [int, float]:
-                    dic[tmp1] = eval(tmp2)
-            except ValueError:
-                pass
-        return [arls[0], dic]
-            
-
     def preloop(self):
         """Prints if isatty is false"""
         if not sys.__stdin__.isatty():
-            print('(hbnb)', end="")
+            print('(hbnb)')
 
     def precmd(self, line):
         """Reformat command line for advanced command syntax.
@@ -135,19 +115,24 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        clas, kwargs = self.argparse(args)
-        if not clas:
+        try:
+            if not args:
+                raise SyntaxError()
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_splited[1] = eval(arg_splited[1])
+                if type(arg_splited[1]) is str:
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
+                kw[arg_splited[0]] = arg_splited[1]
+        except SyntaxError:
             print("** class name missing **")
-            return
-        elif clas not in HBNBCommand.classes:
+        except NameError:
             print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[clas](**kwargs)
-        if kwargs and kwargs != {}:
-            storage.new(new_instance)
-        storage.save()
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+        new_instance.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -229,13 +214,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
-        else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 print_list.append(str(v))
-
+        else:
+            for k, v in storage.all().items():
+                print_list.append(str(v))
         print(print_list)
 
     def help_all(self):
