@@ -1,0 +1,9 @@
+#!/usr/bin/python3
+a = 3
+if a == 3:
+    def pr():
+        print("a = 3")
+else:
+    def pr():
+        print("a != 3")
+pr()

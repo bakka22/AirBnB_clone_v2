@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 
 @app.route('/states_list', strict_slashes=False)
-def hello():
+def list_states():
     """ print a list of states """
     states = storage.all("State")
     state_list = list(states.values())
@@ -17,6 +17,7 @@ def hello():
 
 @app.teardown_appcontext
 def reset(exception):
+    """ reset session """
     storage.close()
 
 
