@@ -2,16 +2,14 @@
 """ starts a Flask web application """
 from flask import Flask, render_template
 from models import storage
-from models import state, city
 app = Flask(__name__)
 
 
-state=state.State
-states = storage.all(state)
 @app.route('/states_list', strict_slashes=False)
 def hello():
     """ print a list of states """
-    global states, storage
+    global storage
+    states = storage.all("State")
     state_list = []
     for k, state in states.items():
         state_list.append(state)
