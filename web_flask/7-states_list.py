@@ -7,11 +7,11 @@ app = Flask(__name__)
 
 
 state=state.State
+states = storage.all(state)
 @app.route('/states_list', strict_slashes=False)
 def hello():
     """ print a list of states """
-    global state, storage
-    states = storage.all(state)
+    global states, storage
     state_list = []
     for k, state in states.items():
         state_list.append(state)
